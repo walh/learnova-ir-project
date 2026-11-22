@@ -1,6 +1,3 @@
-import os
-os.environ["JAVA_HOME"] = "/usr/lib/jvm/default-java"
-import pyterrier as pt
 import streamlit as st
 import pandas as pd
 import pyterrier as pt
@@ -9,18 +6,19 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from tempfile import mkdtemp
+import os
 
 # 1. Initialize PyTerrier
 if not pt.started():
     pt.init()
 
-# 2. Setup NLTK (Exactly matching your notebook)
+# 2. Setup NLTK
 nltk.download('stopwords', quiet=True)
 stop_words = set(stopwords.words('english'))
 stop_words.difference_update(['no', 'nor', 'not'])
 stemmer = PorterStemmer()
 
-# 3. Your Preprocessing functions
+# 3. Preprocessing functions
 def normalize(text):
     text = str(text).lower()
     text = re.sub(r'https?://\S+|www\.\S+', '', text)
@@ -41,13 +39,17 @@ def preprocess(text):
 # 4. Load data and build the index
 @st.cache_resource
 def load_system():
-    collection = pd.read_csv("collection.csv")
+    # Load the NEW app collection with URLs
+    collection = pd.read_csv("app_collection.csv")
+    
+    # Combine title and text for indexing
     collection["content"] = collection["title"].fillna("") + " " + collection["text"].fillna("")
     collection["processed_content"] = collection["content"].apply(preprocess)
     
     documents = collection[["docno", "processed_content"]].copy()
     documents.columns = ["docno", "text"]
     
+    # Build index
     indexer = pt.terrier.IterDictIndexer(mkdtemp(), stemmer=None, stopwords=None)
     index = indexer.index(documents.to_dict("records"))
     
@@ -88,8 +90,8 @@ if st.button("Search", type="primary"):
         if results.empty:
             st.info("No results found.")
         else:
-            # Combine results with original course titles
-            results = results.merge(collection[["docno", "title", "text"]], on="docno")
+            # Merge results with our new collection that includes URLs
+            results = results.merge(collection[["docno", "title", "text", "Course URL"]], on="docno")
             
             st.success(f"Showing top {len(results)} results using {model_choice}")
             
@@ -101,4 +103,9 @@ if st.button("Search", type="primary"):
                 # Show a snippet of the description
                 snippet = row['text'][:400] + "..." if len(row['text']) > 400 else row['text']
                 st.write(snippet)
+                
+                # Add the clickable URL button
+                if pd.notna(row["Course URL"]) and str(row["Course URL"]).strip() != "":
+                    st.markdown(f"[🔗 View Course on Coursera]({row['Course URL']})")
+                
                 st.divider()
