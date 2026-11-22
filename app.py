@@ -1,3 +1,5 @@
+import os
+os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-17-openjdk-amd64"
 import streamlit as st
 import pandas as pd
 import pyterrier as pt
