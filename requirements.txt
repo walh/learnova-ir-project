@@ -1,4 +1,4 @@
 streamlit
-pyterrier
+pyterrier[all]
 pandas
 nltk
