@@ -13,7 +13,12 @@ st.markdown('''<style>
 def setup():
     data = pd.read_csv('cleaned_dataset_restored.csv', dtype=str, keep_default_na=False)
     coll = pd.read_csv('collection_restored.csv', dtype=str, keep_default_na=False)
-    assert len(data) == len(coll) and data['Course Name'].tolist() == coll['title'].tolist(), 'Dataset alignment failed'
+    st.write("Dataset rows:", len(data))
+    st.write("Collection rows:", len(coll))
+    differences = [(i, a, b) for i, (a, b) in enumerate(zip(data['Course Name'], coll['title'])) if a != b]
+    st.write("Mismatched titles:", len(differences))
+    st.write("First differences:", differences[:5])
+assert len(data) == len(coll) and data['Course Name'].tolist() == coll['title'].tolist(), 'Dataset alignment failed'
     data['docno']=coll.docno
     try: sw=set(stopwords.words('english'))
     except LookupError:
