@@ -1,0 +1,2 @@
+# Learnova
+Run `pip install -r requirements.txt` then `streamlit run app.py`. Java 17 and internet access for first-run Terrier and NLTK downloads are needed. Deploy to Streamlit Community Cloud with these files in your repository and app.py as entry point. Include both CSV files. The app uses the same preprocessing and PyTerrier retrieval models as the notebook. Course links come from the dataset, not a live Coursera API. Saved courses are session-only.

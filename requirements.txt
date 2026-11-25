@@ -1,0 +1,4 @@
+streamlit>=1.35
+pandas
+nltk
+python-terrier>=0.13
