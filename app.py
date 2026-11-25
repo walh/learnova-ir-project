@@ -20,7 +20,7 @@ st.set_page_config(
 # WEBSITE DESIGN
 # ==============================
 
-st.markdown("""
+st.html("""
 <style>
 
 .stApp {
@@ -66,7 +66,7 @@ st.markdown("""
     font-size: clamp(32px, 5vw, 56px);
     letter-spacing: -2px;
     line-height: 1.08;
-    margin: 8px 0;
+    margin: 12px 0;
     max-width: 800px;
 }
 
@@ -86,59 +86,72 @@ st.markdown("""
     background: white;
     border: 1px solid #dce5f5;
     border-radius: 16px;
-    padding: 20px;
-    min-height: 190px;
+    padding: 22px;
+    min-height: 220px;
+    transition: 0.2s ease;
+}
+
+.course:hover {
+    border-color: #0056d2;
+    box-shadow: 0 6px 20px #0056d215;
 }
 
 .course h3 {
     color: #142344;
-    margin: 8px 0;
+    font-size: 21px;
+    line-height: 1.35;
+    margin: 10px 0;
 }
 
 .meta {
     color: #526481;
     font-size: 14px;
+    line-height: 1.6;
 }
 
 .tag {
     display: inline-block;
     background: #e9f1ff;
     color: #164c9e;
-    padding: 4px 9px;
+    padding: 5px 10px;
     border-radius: 8px;
     font-size: 12px;
     margin: 3px;
 }
 
+.rating {
+    background: #fff4d9;
+    color: #946200;
+}
+
 .stButton button {
     border-radius: 10px;
+    transition: 0.2s ease;
 }
 
-[data-testid="stMetric"] {
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    border: 1px solid #dce5f5;
+.stButton button:hover {
+    border-color: #0056d2;
+    color: #0056d2;
 }
 
-.st-key-topic0 button,
-.st-key-topic3 button,
-.st-key-topic6 button {
+.st-key-topic0 button {
     background: #e8f0ff !important;
     color: #17469b !important;
 }
 
-.st-key-topic1 button,
-.st-key-topic5 button,
-.st-key-topic8 button {
+.st-key-topic1 button {
     background: #f0e8ff !important;
     color: #6940a0 !important;
 }
 
-.st-key-topic2 button,
-.st-key-topic7 button {
+.st-key-topic2 button {
     background: #e2f4eb !important;
     color: #16664c !important;
+}
+
+.st-key-topic3 button {
+    background: #e1f1fa !important;
+    color: #1877a5 !important;
 }
 
 .st-key-topic4 button {
@@ -146,14 +159,39 @@ st.markdown("""
     color: #a44c27 !important;
 }
 
+.st-key-topic5 button {
+    background: #fbe8f2 !important;
+    color: #b24785 !important;
+}
+
+.st-key-topic6 button {
+    background: #e6f2db !important;
+    color: #57853b !important;
+}
+
+.st-key-topic7 button {
+    background: #fff0de !important;
+    color: #a66b20 !important;
+}
+
+.st-key-topic8 button {
+    background: #e8e8fa !important;
+    color: #5656ad !important;
+}
+
 [class*="st-key-topic"] button {
-    min-height: 76px;
+    min-height: 85px;
     border: 1px solid #d7e2f2;
     font-weight: 650;
     border-radius: 16px;
 }
 
-.st-key-searchbox input {
+[class*="st-key-topic"] button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px #14234415;
+}
+
+.st-key-query input {
     font-size: 17px;
     min-height: 48px;
 }
@@ -167,8 +205,27 @@ st.markdown("""
     background: #0056d2;
 }
 
+.coursera-banner {
+    background: #e8f0ff;
+    border: 1px solid #d5e4ff;
+    border-radius: 20px;
+    padding: 28px;
+    margin-top: 24px;
+}
+
+.coursera-banner h2 {
+    color: #0056d2;
+    font-size: 32px;
+    margin: 0;
+}
+
+.coursera-banner p {
+    color: #526481;
+    margin: 10px 0;
+}
+
 </style>
-""", unsafe_allow_html=True)
+""")
 
 
 # ==============================
@@ -224,6 +281,7 @@ def setup():
     stem = PorterStemmer()
 
     def prep(s):
+
         s = re.sub(
             r"https?://\S+|www\.\S+",
             "",
@@ -311,55 +369,41 @@ def esc(x):
 # COURSE CARDS
 # ==============================
 
-def course(doc, rank=None, score=None, key=""):
+def course(doc, key=""):
 
     r = data.loc[doc]
 
-    title = str(r["Course Name"])
+    title = str(r["Course Name"]).title()
     rating = r["Course Rating"]
     level = str(r["Difficulty Level"]).title()
-    url = str(r["Course URL"])
+    url = str(r["Course URL"]).strip()
     skills = str(r["Skills"])
     university = str(r["University"]).title()
 
-    rank_text = f"#{rank} · " if rank else ""
+    if university.lower() == "ibm":
+        university = "IBM"
 
-    st.markdown(
-        f"""
-        <div class="course">
-            <div class="meta">
-                {rank_text}{esc(university)}
-            </div>
+    # Render HTML directly instead of Markdown.
 
-            <h3>{esc(title)}</h3>
-
-            <span class="tag">
-                ★ {esc(rating)}
-            </span>
-
-            <span class="tag">
-                {esc(level)}
-            </span>
-
-            <p class="meta">
-                {esc(skills[:160])}
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if score is not None:
-        st.caption(
-            f"Retrieval score: {score:.4f} · {doc}"
-        )
+    st.html(f"""
+    <div class="course">
+        <div class="meta">{esc(university)}</div>
+        <h3>{esc(title)}</h3>
+        <span class="tag rating">★ {esc(rating)}</span>
+        <span class="tag">{esc(level)}</span>
+        <p class="meta">
+            <strong>Skills you'll gain:</strong><br>
+            {esc(skills[:160])}
+        </p>
+    </div>
+    """)
 
     a, b = st.columns([3, 1])
 
     parsed = urlparse(url)
 
     if (
-        parsed.scheme == "https"
+        parsed.scheme in ("http", "https")
         and parsed.hostname in (
             "www.coursera.org",
             "coursera.org"
@@ -370,6 +414,8 @@ def course(doc, rank=None, score=None, key=""):
             url,
             use_container_width=True
         )
+    else:
+        a.caption("Course link unavailable")
 
     label = (
         "Saved ✓"
@@ -386,7 +432,7 @@ def course(doc, rank=None, score=None, key=""):
 
         st.rerun()
 
-    with st.expander("Course details"):
+    with st.expander("About this course"):
         st.write(r["Course Description"])
 
 
@@ -408,34 +454,26 @@ link.link_button(
 # HERO SECTION
 # ==============================
 
-st.markdown(
-    f"""
-    <div class="hero">
-
-        <div class="eyebrow">
-            LEARN WITHOUT LIMITS
-        </div>
-
-        <h1>
-            Big ambitions start<br>
-            with small steps.
-        </h1>
-
-        <p>
-            Discover your next passion.
-            Build new skills at your own pace.
-        </p>
-
-        <p style="font-size:14px">
-            {len(data):,} courses
-            &nbsp; · &nbsp;
-            {data.University.nunique()} learning providers
-        </p>
-
+st.html(f"""
+<div class="hero">
+    <div class="eyebrow">
+        LEARN WITHOUT LIMITS
     </div>
-    """,
-    unsafe_allow_html=True
-)
+    <h1>
+        Big ambitions start<br>
+        with small steps.
+    </h1>
+    <p>
+        Discover your next passion.
+        Build new skills at your own pace.
+    </p>
+    <p style="font-size:14px">
+        {len(data):,} courses
+        &nbsp; · &nbsp;
+        {data.University.nunique()} learning providers
+    </p>
+</div>
+""")
 
 
 # ==============================
@@ -444,7 +482,7 @@ st.markdown(
 
 discover, saved = st.tabs([
     "Discover courses",
-    "My learning"
+    f"My learning ({len(st.session_state.saved)})"
 ])
 
 
@@ -478,6 +516,10 @@ with discover:
     # ==============================
 
     st.markdown("### Explore by topic")
+
+    st.write(
+        "Find something that sparks your curiosity."
+    )
 
     topics = [
         (
@@ -520,10 +562,14 @@ with discover:
 
     for start in range(0, len(topics), 3):
 
-        for i, col in enumerate(
-            st.columns(3),
-            start
-        ):
+        columns = st.columns(3)
+
+        for offset, col in enumerate(columns):
+
+            i = start + offset
+
+            if i >= len(topics):
+                continue
 
             label, term = topics[i]
 
@@ -546,6 +592,11 @@ with discover:
 
     st.markdown(
         "### Find your next opportunity"
+    )
+
+    st.caption(
+        "Choose a goal and discover courses "
+        "that help you get there."
     )
 
     a, b, c = st.columns(3)
@@ -627,14 +678,21 @@ with discover:
 
     term = q.strip() or "python programming"
 
-    st.markdown(
-        "### "
-        + (
-            "Search results"
-            if q.strip()
-            else "Start exploring"
+    st.divider()
+
+    if q.strip():
+
+        st.markdown("### Search results")
+        st.write(f"Explore courses related to **{q}**")
+
+    else:
+
+        st.markdown("### Start exploring")
+
+        st.caption(
+            "Discover programming courses "
+            "or choose a topic above."
         )
-    )
 
     res = search(term, model)
 
@@ -661,22 +719,25 @@ with discover:
 
         selected.append(r)
 
-    st.caption(
+    left, right = st.columns([3, 1])
+
+    left.caption(
         f"{len(selected)} matching courses "
-        "in the top 100 search results"
+        "among the top 100 results"
     )
 
-    if not selected:
-        st.info(
-            "No matching courses. "
-            "Try a different search or relax your filters."
-        )
-
-    limit = st.selectbox(
+    limit = right.selectbox(
         "Courses to display",
         [6, 12, 24, 48],
         index=0
     )
+
+    if not selected:
+
+        st.info(
+            "No matching courses. "
+            "Try a different search or relax your filters."
+        )
 
     cols = st.columns(2)
 
@@ -698,6 +759,10 @@ with saved:
 
     st.markdown("### Your learning list")
 
+    st.write(
+        "Your next adventure starts here."
+    )
+
     st.caption(
         "Keep track of courses you want "
         "to explore during this session."
@@ -706,31 +771,49 @@ with saved:
     if not st.session_state.saved:
 
         st.info(
-            "Save a course to start your learning list."
+            "Your learning list is empty. "
+            "Explore courses and click Save "
+            "to add your favorites."
         )
 
-    for d in list(st.session_state.saved):
+    else:
 
-        course(
-            d,
-            key="saved"
+        st.metric(
+            "Saved courses",
+            len(st.session_state.saved)
         )
+
+        cols = st.columns(2)
+
+        for i, d in enumerate(
+            list(st.session_state.saved)
+        ):
+
+            with cols[i % 2]:
+
+                course(
+                    d,
+                    key="saved"
+                )
 
 
 # ==============================
 # COURSERA SECTION
 # ==============================
 
-st.divider()
-
-st.markdown(
-    "### Continue your learning journey"
-)
-
-st.write(
-    "Discover courses on Learnova "
-    "and continue learning on Coursera."
-)
+st.html("""
+<div class="coursera-banner">
+    <h2>coursera</h2>
+    <h3 style="color:#142344">
+        Continue your learning journey.
+    </h3>
+    <p>
+        Discover courses on Learnova and explore
+        learning opportunities from universities
+        and organizations around the world on Coursera.
+    </p>
+</div>
+""")
 
 st.link_button(
     "Explore Coursera ↗",
@@ -741,6 +824,12 @@ st.link_button(
 # ==============================
 # FOOTER
 # ==============================
+
+st.divider()
+
+st.caption(
+    "© Learnova · Discover. Learn. Grow."
+)
 
 st.caption(
     "Learnova is an independent academic project "
