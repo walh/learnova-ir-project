@@ -11,9 +11,9 @@ st.markdown('''<style>
 </style>''',unsafe_allow_html=True)
 @st.cache_resource(show_spinner='Preparing the course search index…')
 def setup():
-    data=pd.read_csv('cleaned_dataset_restored.csv').fillna('')
-    coll=pd.read_csv('collection_restored.csv').fillna('')
-    assert len(data)==len(coll) and data['Course Name'].equals(coll['title']), 'Dataset alignment failed'
+    data = pd.read_csv('cleaned_dataset_restored.csv', dtype=str, keep_default_na=False)
+    coll = pd.read_csv('collection_restored.csv', dtype=str, keep_default_na=False)
+    assert len(data) == len(coll) and data['Course Name'].tolist() == coll['title'].tolist(), 'Dataset alignment failed'
     data['docno']=coll.docno
     try: sw=set(stopwords.words('english'))
     except LookupError:
