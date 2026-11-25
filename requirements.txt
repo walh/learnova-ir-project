@@ -1,4 +1,0 @@
-streamlit
-pyterrier[all]
-pandas
-nltk
